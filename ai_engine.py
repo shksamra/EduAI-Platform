@@ -18,35 +18,32 @@ from threading import Thread
 
 
 @st.cache_resource
-# --- UPDATED AI ENGINE WITH FLAN-T5 ---
-
-@st.cache_resource
 def load_all_engines():
-    # 1. Embedding Model (Stays the same)
+    # 1. MiniLM (Stays the same - very small)
     embed = SentenceTransformer('all-MiniLM-L6-v2')
     
-    # 2. Optimized Quiz Model: Qwen 2.5 1.5B (Fast & Accurate)
-    # No registration or login required. Works instantly.
+    # 2. Qwen 0.5B (Stays the same)
     q_model_id = "Qwen/Qwen2.5-0.5B-Instruct"
     q_tok = AutoTokenizer.from_pretrained(q_model_id)
     q_mod = AutoModelForCausalLM.from_pretrained(
         q_model_id, 
         torch_dtype="auto", 
+        low_cpu_mem_usage=True, # Critical for Cloud
         device_map="auto"
     )
     
-    # 3. NEW SUPER ACCURATE T5 (Flan-T5-Base)
-    # This model is significantly more accurate for educational summaries
-    s_model_name = "google/flan-t5-base" 
+    # 3. SWITCH TO T5-SMALL (Base is too big for the Cloud)
+    s_model_name = "google/flan-t5-small" 
     s_tok = AutoTokenizer.from_pretrained(s_model_name)
     s_mod = AutoModelForSeq2SeqLM.from_pretrained(
         s_model_name, 
-        torch_dtype="auto", 
-        device_map="auto",
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True, # Critical for Cloud
+        device_map="auto"
     )
     
     return embed, q_tok, q_mod, s_tok, s_mod
+
+
 def load_optimized_models():
     embed_model = SentenceTransformer('all-MiniLM-L6-v2')
     model_name = "Qwen/Qwen2.5-0.5B-Instruct"
